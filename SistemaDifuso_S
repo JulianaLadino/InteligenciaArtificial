@@ -1,0 +1,58 @@
+## Instalacion Librerias por Terminal
+# pip install scikit-fuzzy
+# pip install numpy
+# pip install matplotlib
+# pip install networkx
+
+# Importar Librerias
+import numpy as np
+import skfuzzy as fuzz 
+import skfuzzy.control as ctrl
+from tkinter import *
+import matplotlib.pyplot as plt
+
+# Variables
+antecedentes = ctrl.Antecedent(np.arange(0,  5, 0.5), 'antecedentes')  # Ej: historial médico
+sintomas = ctrl.Antecedent(np.arange(0, 10, 0.5), 'sintomas')  # Ej: severidad de síntomas
+diagnostico = ctrl.Consequent(np.arange(0, 6, 0.5), 'diagnostico')  # Ej: probabilidad de una condición
+
+# Configurar Conjuntos
+# Configurar MF -- Antecedentes
+antecedentes['leve'] = fuzz.trapmf(antecedentes.universe, [0, 0, 1, 2])
+antecedentes['moderado'] = fuzz.trapmf(antecedentes.universe, [1.5, 2.5, 3, 3.5])
+antecedentes['grave'] = fuzz.trapmf(antecedentes.universe, [3, 4, 5, 5])
+
+# Configurar MF -- Síntomas
+sintomas['bajos'] = fuzz.trapmf(sintomas.universe, [0, 0, 3.5, 5])
+sintomas['altos'] = fuzz.trapmf(sintomas.universe, [4, 6, 10, 10])
+
+# Configurar MF -- Diagnóstico
+diagnostico['saludable'] = fuzz.trimf(diagnostico.universe, [0, 0, 2.5])
+diagnostico['riesgo_moderado'] = fuzz.trimf(diagnostico.universe, [2, 3, 3.5])
+diagnostico['riesgo_alto'] = fuzz.trimf(diagnostico.universe, [3, 4, 5])
+
+# Visualización
+
+antecedentes.view()
+sintomas.view()
+diagnostico.view()
+
+
+# Reglas
+rule1 = ctrl.Rule(antecedentes['grave'] | sintomas['bajos'], diagnostico['saludable'])
+rule2 = ctrl.Rule(antecedentes['moderado'] & sintomas['altos'], diagnostico['riesgo_moderado'])
+rule3 = ctrl.Rule(antecedentes['leve'], diagnostico['riesgo_alto'])
+
+diagnostico_ctrl = ctrl.ControlSystem([rule1, rule2, rule3])
+prop = ctrl.ControlSystemSimulation(diagnostico_ctrl)
+prop.input['antecedentes'] = 9  # Nivel de antecedentes médicos
+prop.input['sintomas'] = 2      # Severidad de síntomas
+prop.compute()
+print (prop.output['diagnostico'])
+diagnostico.view(sim=prop)
+plt.show()
+
+# mantener la ventana activa
+mainloop() 
+
+print('Fin programa')

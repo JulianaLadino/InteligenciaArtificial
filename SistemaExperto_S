@@ -1,0 +1,78 @@
+# Instalación de Librerías por Terminal
+# pip install clipspy
+
+# Importar Librerías
+import clips
+from tkinter import *
+
+# Ambiente Sistema 
+sistemaExperto = clips.Environment()
+sistemaExperto.clear()
+
+# Reglas relacionadas con el cabello
+reglaCabelloOndulado = ("(defrule reglaCabelloOndulado (Ondulado) => (assert(CabelloOndulado)))")
+reglaCabelloLiso = ("(defrule reglaCabelloLiso (Liso) => (assert(CabelloLiso)))")
+reglaCabelloRizado = ("(defrule reglaCabelloRizado (Rizado) => (assert(CabelloRizado)))")
+
+
+sistemaExperto.build(reglaCabelloOndulado)
+sistemaExperto.build(reglaCabelloLiso)
+sistemaExperto.build(reglaCabelloRizado)
+
+
+# Imprimir Reglas
+for r in sistemaExperto.rules():
+    print(r)
+
+# Crear Ventana
+frame = Tk() 
+frame.title("Sistema Experto Cuidado Según El Tipo De Cabello") 
+frame.geometry('680x250')
+frame.configure(bg="#bb8ab4")  # Fondo con un color suave
+
+# Encabezado
+header = Label(frame, text="Sistema Experto: Cuidado Según El Tipo De Cabello", font=("Comic Sans MS", 18, "bold"), bg="#bb8ab4", fg="#e3e4e5")
+header.pack(pady=10)
+
+# Función para obtener el texto y pintar el resultado  
+def printInput(): 
+    inp = inputtxt.get(1.0, "end-1c") 
+    
+    elHecho = inp 
+    sistemaExperto.assert_string(f"({elHecho})")
+    
+    for fact in sistemaExperto.facts():
+        print(fact)
+
+    # Agenda
+    for ac in sistemaExperto.activations():
+        print(ac)
+
+    sistemaExperto.run()
+
+    # Mostrar resultados
+    resultado = ""
+    for fact in sistemaExperto.facts():
+        factString = str(fact)
+        if "CabelloOndulado" in factString:
+            resultado += "Usa productos hidratantes y define los rizos.\n"
+        if "CabelloLiso" in factString:
+            resultado += "Cepillarlo suavemente, y protegerlo del calor.\n"
+        if "CabelloRizado" in factString:
+            resultado += "Usar hidratantes, tratarlo con suavidad, y secarlo con un difusor\n"
+          
+    lbl.config(text=resultado)
+
+# Caja de Texto 
+inputtxt = Text(frame, height=1, width=30, font=("Comic Sans MS", 12))
+inputtxt.pack(pady=10)
+
+# Botón
+printButton = Button(frame, text="Ejecutar", command=printInput, font=("Comic Sans MS", 12), bg="#855cc9", fg="white", relief="raised")
+printButton.pack(pady=10)
+
+# Etiqueta de Resultados 
+lbl = Label(frame, text="", bg="#bb8ab4", font=("Comic Sans MS", 12), fg="#010101", justify="left")
+lbl.pack(pady=10)
+
+frame.mainloop()
